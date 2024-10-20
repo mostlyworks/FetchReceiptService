@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/google/uuid"
-
 	"github.com/mostlyworks/FetchReceiptService/models"
 	"github.com/mostlyworks/FetchReceiptService/services"
 )
@@ -16,6 +16,7 @@ var appServer App
 func ReceiptRouter(app App) {
 	appServer = app
 	services.InitPointsService(app.pointsConfig)
+	services.InitReceiptService(app.database)
 	app.httpServer.HandleFunc("/receipts/process", receiptHandler)
 	app.httpServer.HandleFunc("/receipts/{id}/points", receiptPointHandler)
 }
@@ -57,13 +58,14 @@ func handleReceiptPOST(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// TODO: Validate Receipt fields.
+	messages := isValidReceipt(receipt)
 
-	receipt.Points = services.GetPoints(receipt)
+	if len(messages) > 0 {
+		http.Error(resp, strings.Join(messages, "\n"), http.StatusBadRequest)
+		return
+	}
 
-	var id = uuid.New()
-
-	appServer.database.Receipts[id] = receipt
+	var id = services.WriteReciept(receipt)
 	var idResp models.Id
 	idResp.Id = id.String()
 
@@ -75,15 +77,73 @@ func handleReceiptPOST(resp http.ResponseWriter, req *http.Request) {
 func handlePointGET(resp http.ResponseWriter, req *http.Request) {
 	// Return Points for "ID"
 	var id = req.PathValue("id")
-	var uuid = uuid.MustParse(id)
-	var receipt, ok = appServer.database.Receipts[uuid]
-	if !ok {
-		http.Error(resp, "Not Found", http.StatusNotFound)
+
+	if !IsValidUUID(id) && len(id) != 0 {
+		http.Error(resp, "ID not Valid", http.StatusBadRequest)
 		return
 	}
-	var points = receipt.Points
+
+	var uuid = uuid.MustParse(id)
+	var points, ok = services.GetReceiptPoints(uuid)
+	if !ok {
+		http.Error(resp, "Receipt Not Found", http.StatusNotFound)
+		return
+	}
+
 	var pointsResp models.Points
 	pointsResp.Points = points
 	resp.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(resp).Encode(pointsResp)
+}
+
+func IsValidUUID(u string) bool {
+	_, err := uuid.Parse(u)
+	return err == nil
+}
+
+func isValidReceipt(receipt models.Receipt) []string {
+	var messages []string
+	// No items
+	if !(len(receipt.Items) > 0) {
+		messages = append(messages, "No items provided")
+	}
+
+	// No date
+	if receipt.PurchaseDate.IsZero() {
+		messages = append(messages, "Purchase date not provided")
+	}
+
+	// No Time
+	if receipt.PurchaseTime.IsZero() {
+		messages = append(messages, "Purchase time not provided")
+	}
+
+	// No Retailer
+	if !(len(receipt.Retailer) > 0) {
+		messages = append(messages, "Retailer not provided")
+	}
+
+	// No Total
+	if receipt.Total.IsZero() {
+		messages = append(messages, "Total not provided")
+	}
+
+	// Check item contents
+	if !isValidItems(receipt.Items) {
+		messages = append(messages, "Provided items not valid")
+	}
+
+	return messages
+}
+
+func isValidItems(items []models.Item) bool {
+	for _, value := range items {
+		if value.Price.IsZero() {
+			return false
+		}
+		if !(len(value.ShortDescription) > 0) {
+			return false
+		}
+	}
+	return true
 }

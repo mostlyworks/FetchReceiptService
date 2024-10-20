@@ -3,10 +3,9 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/mostlyworks/FetchReceiptService/models"
 	"log"
 	"os"
-
-	"github.com/mostlyworks/FetchReceiptService/models"
 )
 
 func LoadPointConfig() models.PointConfig {
@@ -60,8 +59,6 @@ func loadDefaultPointConfig(pointConfig models.PointConfig) models.PointConfig {
 	pointConfig.PurchaseTimeLowerBound = 14
 	pointConfig.PurchaseTimeUpperBound = 16
 	pointConfig.PurchaseTimePoints = 10
-	pointConfig.DateExpectedFormat = "2006-01-02"
-	pointConfig.TimeExpectedFormat = "15:04"
 	pointConfig.RetailerNamePointMutiplier = 1
 	pointConfig.DefaultPointReturn = 0
 

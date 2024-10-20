@@ -6,6 +6,5 @@ import (
 
 func main() {
 	var server = api.CreateServer()
-
 	api.StartServer(server)
 }

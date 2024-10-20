@@ -13,8 +13,6 @@
     "purchaseTimeLowerBound": 14,
     "purchaseTimeUpperBound": 16,
     "purchaseTimePoints": 10,
-    "dateExpectedFormat": "2006-01-02",
-    "timeExpectedFormat": "15:04",
     "retailerNamePointMutiplier": 1,
     "defaultPointReturn": 0
 }

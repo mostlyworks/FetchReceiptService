@@ -1,10 +1,13 @@
 package services
 
 import (
+	"log"
 	"testing"
+	"time"
 
 	"github.com/mostlyworks/FetchReceiptService/config"
 	"github.com/mostlyworks/FetchReceiptService/models"
+	"github.com/shopspring/decimal"
 )
 
 func setup() {
@@ -15,12 +18,12 @@ func TestReceiptTotalPoints(t *testing.T) {
 	setup()
 	tests := []struct {
 		name   string
-		input  string
+		input  decimal.Decimal
 		output int
 	}{
-		{"Round dollar & .25", "5.00", pointConfig.TotalRoundedPoints + pointConfig.TotalMutiplePoints},
-		{"No points", "35.40", 0},
-		{".25", "1.25", pointConfig.TotalMutiplePoints},
+		{"Round dollar & .25", decimal.NewFromFloat32(5.00), pointConfig.TotalRoundedPoints + pointConfig.TotalMutiplePoints},
+		{"No points", decimal.NewFromFloat32(35.40), 0},
+		{".25", decimal.NewFromFloat32(1.25), pointConfig.TotalMutiplePoints},
 	}
 
 	for _, test := range tests {
@@ -64,19 +67,19 @@ func TestItemPoints(t *testing.T) {
 		input  []models.Item
 		output int
 	}{
-		{"Mutiple of 3", []models.Item{{ShortDescription: "   Klarbrunn 12-PK 12 FL OZ  ", Price: "12.00"}}, 3},
+		{"Mutiple of 3", []models.Item{{ShortDescription: "   Klarbrunn 12-PK 12 FL OZ  ", Price: decimal.NewFromFloat32(12.00)}}, 3},
 		{"4 Items",
-			[]models.Item{{ShortDescription: "Gatorade", Price: "2.00"},
-				{ShortDescription: "Gatorade", Price: "2.00"},
-				{ShortDescription: "Gatorade", Price: "2.00"},
-				{ShortDescription: "Gatorade", Price: "2.00"}},
+			[]models.Item{{ShortDescription: "Gatorade", Price: decimal.NewFromFloat32(2.00)},
+				{ShortDescription: "Gatorade", Price: decimal.NewFromFloat32(2.00)},
+				{ShortDescription: "Gatorade", Price: decimal.NewFromFloat32(2.00)},
+				{ShortDescription: "Gatorade", Price: decimal.NewFromFloat32(2.00)}},
 			pointConfig.ItemCountPoints * 2},
 		{"5 Items",
-			[]models.Item{{ShortDescription: "Gatorade", Price: "2.00"},
-				{ShortDescription: "Gatorade", Price: "2.00"},
-				{ShortDescription: "Gatorade", Price: "2.00"},
-				{ShortDescription: "Gatorade", Price: "2.00"},
-				{ShortDescription: "Gatorade", Price: "2.00"}},
+			[]models.Item{{ShortDescription: "Gatorade", Price: decimal.NewFromFloat32(2.00)},
+				{ShortDescription: "Gatorade", Price: decimal.NewFromFloat32(2.00)},
+				{ShortDescription: "Gatorade", Price: decimal.NewFromFloat32(2.00)},
+				{ShortDescription: "Gatorade", Price: decimal.NewFromFloat32(2.00)},
+				{ShortDescription: "Gatorade", Price: decimal.NewFromFloat32(2.00)}},
 			pointConfig.ItemCountPoints * 2},
 	}
 
@@ -94,11 +97,12 @@ func TestDatePoints(t *testing.T) {
 	setup()
 	tests := []struct {
 		name   string
-		input  string
+		input  models.Date
 		output int
 	}{
-		{"Odd Date", "2024-10-30", 0},
-		{"Even Date", "2024-10-31", pointConfig.PurchaseDatePoints},
+
+		{"Odd Date", models.Date{Time: timeParser(models.DateLayout, "2024-10-30")}, 0},
+		{"Even Date", models.Date{Time: timeParser(models.DateLayout, "2024-10-31")}, pointConfig.PurchaseDatePoints},
 	}
 
 	for _, test := range tests {
@@ -115,13 +119,13 @@ func TestTimePoints(t *testing.T) {
 	setup()
 	tests := []struct {
 		name   string
-		input  string
+		input  models.Time
 		output int
 	}{
-		{"Pre check range", "10:00", 0},
-		{"Post Check range", "20:00", 0},
-		{"Check Range", "14:33", pointConfig.PurchaseTimePoints},
-		{"Check Range", "15:00", pointConfig.PurchaseTimePoints},
+		{"Pre check range", models.Time{Time: timeParser(models.TimeLayout, "10:00")}, 0},
+		{"Post Check range", models.Time{Time: timeParser(models.TimeLayout, "20:00")}, 0},
+		{"Check Range", models.Time{Time: timeParser(models.TimeLayout, "14:33")}, pointConfig.PurchaseTimePoints},
+		{"Check Range", models.Time{Time: timeParser(models.TimeLayout, "15:00")}, pointConfig.PurchaseTimePoints},
 	}
 
 	for _, test := range tests {
@@ -144,48 +148,48 @@ func TestGetPoints(t *testing.T) {
 	}{
 		{"Ex 1", models.Receipt{
 			Retailer:     "Target",
-			PurchaseDate: "2022-01-01",
-			PurchaseTime: "13:01",
+			PurchaseDate: models.Date{Time: timeParser(models.DateLayout, "2022-01-01")},
+			PurchaseTime: models.Time{Time: timeParser(models.TimeLayout, "13:01")},
 			Items: []models.Item{
 				{
 					ShortDescription: "Mountain Dew 12PK",
-					Price:            "6.49",
+					Price:            decimal.NewFromFloat32(6.49),
 				}, {
 					ShortDescription: "Emils Cheese Pizza",
-					Price:            "12.25",
+					Price:            decimal.NewFromFloat32(12.25),
 				}, {
 					ShortDescription: "Knorr Creamy Chicken",
-					Price:            "1.26",
+					Price:            decimal.NewFromFloat32(1.26),
 				}, {
 					ShortDescription: "Doritos Nacho Cheese",
-					Price:            "3.35",
+					Price:            decimal.NewFromFloat32(3.35),
 				}, {
 					ShortDescription: "   Klarbrunn 12-PK 12 FL OZ  ",
-					Price:            "12.00",
+					Price:            decimal.NewFromFloat32(12.00),
 				},
 			},
-			Total: "35.35",
+			Total: decimal.NewFromFloat32(35.35),
 		}, 28},
 		{"Ex 2", models.Receipt{
 			Retailer:     "M&M Corner Market",
-			PurchaseDate: "2022-03-20",
-			PurchaseTime: "14:33",
+			PurchaseDate: models.Date{Time: timeParser(models.DateLayout, "2022-03-20")},
+			PurchaseTime: models.Time{Time: timeParser(models.TimeLayout, "14:33")},
 			Items: []models.Item{
 				{
 					ShortDescription: "Gatorade",
-					Price:            "2.25",
+					Price:            decimal.NewFromFloat32(2.25),
 				}, {
 					ShortDescription: "Gatorade",
-					Price:            "2.25",
+					Price:            decimal.NewFromFloat32(2.25),
 				}, {
 					ShortDescription: "Gatorade",
-					Price:            "2.25",
+					Price:            decimal.NewFromFloat32(2.25),
 				}, {
 					ShortDescription: "Gatorade",
-					Price:            "2.25",
+					Price:            decimal.NewFromFloat32(2.25),
 				},
 			},
-			Total: "9.00",
+			Total: decimal.NewFromFloat32(9.00),
 		}, 109},
 	}
 
@@ -197,4 +201,12 @@ func TestGetPoints(t *testing.T) {
 			}
 		})
 	}
+}
+
+func timeParser(format string, input string) time.Time {
+	time, err := time.Parse(format, input)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return time
 }

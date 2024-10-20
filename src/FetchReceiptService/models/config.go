@@ -15,8 +15,6 @@ type PointConfig struct {
 	PurchaseTimeLowerBound        int     `json:"purchaseTimeLowerBound"`
 	PurchaseTimeUpperBound        int     `json:"purchaseTimeUpperBound"`
 	PurchaseTimePoints            int     `json:"purchaseTimePoints"`
-	DateExpectedFormat            string  `json:"dateExpectedFormat"`
-	TimeExpectedFormat            string  `json:"timeExpectedFormat"`
 	RetailerNamePointMutiplier    int     `json:"retailerNamePointMutiplier"`
 	DefaultPointReturn            int     `json:"defaultPointReturn"`
 }

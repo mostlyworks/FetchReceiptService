@@ -2,13 +2,12 @@ package api
 
 import (
 	"fmt"
-	"log"
-	"net/http"
-	"strconv"
-
 	"github.com/mostlyworks/FetchReceiptService/config"
 	"github.com/mostlyworks/FetchReceiptService/models"
 	"github.com/mostlyworks/FetchReceiptService/repository"
+	"log"
+	"net/http"
+	"strconv"
 )
 
 type App struct {

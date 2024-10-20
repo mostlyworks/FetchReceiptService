@@ -71,6 +71,9 @@ Expected inputs for cert and key are filenames to be loaded.
 Port changes should cause little issue.
 If Https is true and no cert or key are provided, it will default to useing http.
 
+## Point Calcuation
+I set this up to calcuate points on submission with the mindset that depending on the point offers this could change over time. So it would make more sense to run it when recieved rather than retrieval as that could cause it to change later (increase or decrease point counts) if things were later modified.
+
 ## Tests
 Unit tests are provided for point calculations. End to end testing of the full expected cycle would have been good to have, but is not currently impossible to manually test.
 
