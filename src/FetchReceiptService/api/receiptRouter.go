@@ -63,11 +63,6 @@ func handleReceiptPOST(resp http.ResponseWriter, req *http.Request) {
 
 	var id = uuid.New()
 
-	// Locking might be overkill.
-	// Definately kills concurency
-	// appServer.database.ReceiptsMu.Lock()
-	// defer appServer.database.ReceiptsMu.Unlock()
-
 	appServer.database.Receipts[id] = receipt
 	var idResp models.Id
 	idResp.Id = id.String()

@@ -1,15 +1,12 @@
 package repository
 
 import (
-	"sync"
-
 	"github.com/google/uuid"
 	"github.com/mostlyworks/FetchReceiptService/models"
 )
 
 type Database struct {
-	Receipts   map[uuid.UUID]models.Receipt
-	ReceiptsMu *sync.Mutex
+	Receipts map[uuid.UUID]models.Receipt
 }
 
 func Init() Database {
