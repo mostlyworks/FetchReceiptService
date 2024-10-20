@@ -1,56 +1,14 @@
 package services
 
 import (
-	"encoding/json"
-	"fmt"
-	"log"
-	"os"
 	"testing"
 
+	"github.com/mostlyworks/FetchReceiptService/config"
 	"github.com/mostlyworks/FetchReceiptService/models"
 )
 
 func setup() {
-	var loadedPointConfig models.PointConfig
-	pointConfigFile, err := os.Open("./config/pointConfig.json")
-	defer pointConfigFile.Close()
-	if err != nil {
-		fmt.Println(err.Error())
-		log.Print("Loading with Points Default config")
-		// Load defaults instead
-		loadedPointConfig = loadDefaultPointConfig(loadedPointConfig)
-	} else {
-		jsonParser := json.NewDecoder(pointConfigFile)
-		jsonParser.Decode(&pointConfig)
-		log.Print("Loaded Points Config")
-	}
-
-	InitPointsService(loadedPointConfig)
-}
-
-// This shouldn't be duplicated, but it's for tests. I don't want to make it public either.
-
-func loadDefaultPointConfig(pointConfig models.PointConfig) models.PointConfig {
-	pointConfig.TotalRoundedPoints = 50
-	pointConfig.TotalMutiplePoints = 25
-	pointConfig.TotalMutiple = 0.25
-	pointConfig.TotalRoundMod = 1.00
-	pointConfig.ItemCountPoints = 5
-	pointConfig.ItemCountDivsor = 2
-	pointConfig.ItemDescriptionMutiple = 3
-	pointConfig.ItemDescriptionPriceMutiplier = 0.2
-	pointConfig.PriceMutiplierRoundingPoints = 0
-	pointConfig.PurchaseDatePoints = 6
-	pointConfig.PurchaseDateCheckMod = 2
-	pointConfig.PurchaseTimeLowerBound = 14
-	pointConfig.PurchaseTimeUpperBound = 16
-	pointConfig.PurchaseTimePoints = 10
-	pointConfig.DateExpectedFormat = "2006-01-02"
-	pointConfig.TimeExpectedFormat = "15:04"
-	pointConfig.RetailerNamePointMutiplier = 1
-	pointConfig.DefaultPointReturn = 0
-
-	return pointConfig
+	InitPointsService(config.LoadPointConfig())
 }
 
 func TestReceiptTotalPoints(t *testing.T) {
@@ -82,10 +40,10 @@ func TestRetailerPoints(t *testing.T) {
 		input  string
 		output int
 	}{
-		{"Name with Spaces", "T J M A X", 5},
-		{"Normal name", "Target", 6},
-		{"Latin accented character", "Wàl-mãrt", 5},
-		{"Appostrophy", "bj's wholesale", 12},
+		{"Name with Spaces", "T J M A X", 5 * pointConfig.RetailerNamePointMutiplier},
+		{"Normal name", "Target", 6 * pointConfig.RetailerNamePointMutiplier},
+		{"Latin accented character", "Wàl-mãrt", 5 * pointConfig.RetailerNamePointMutiplier},
+		{"Appostrophy", "bj's wholesale", 12 * pointConfig.RetailerNamePointMutiplier},
 	}
 
 	for _, test := range tests {
@@ -98,6 +56,7 @@ func TestRetailerPoints(t *testing.T) {
 	}
 }
 
+// This test will fail if not loading default config (hardcoded assertion)
 func TestItemPoints(t *testing.T) {
 	setup()
 	tests := []struct {
@@ -175,6 +134,7 @@ func TestTimePoints(t *testing.T) {
 	}
 }
 
+// This test will fail if not using default config (hardcoded assertion)
 func TestGetPoints(t *testing.T) {
 	setup()
 	tests := []struct {

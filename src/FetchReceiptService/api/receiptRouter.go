@@ -75,7 +75,6 @@ func handleReceiptPOST(resp http.ResponseWriter, req *http.Request) {
 	resp.Header().Set("content-Type", "application/json")
 	// This should probably return a 202
 	json.NewEncoder(resp).Encode(idResp)
-	//{ "id": "7fb1377b-b223-49d9-a31a-5a02701dd310" }
 }
 
 func handlePointGET(resp http.ResponseWriter, req *http.Request) {
@@ -92,5 +91,4 @@ func handlePointGET(resp http.ResponseWriter, req *http.Request) {
 	pointsResp.Points = points
 	resp.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(resp).Encode(pointsResp)
-	// { "points": 32 }
 }

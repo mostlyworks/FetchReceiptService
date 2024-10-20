@@ -12,8 +12,6 @@ import (
 
 var pointConfig models.PointConfig
 
-//TODO: Make points configurable on startup via config json.
-
 func InitPointsService(appPointConfig models.PointConfig) {
 	pointConfig = appPointConfig
 }
@@ -34,6 +32,7 @@ func GetPoints(receipt models.Receipt) int {
 // 25 points if the total is a multiple of 0.25.
 // Calculate points on given string total of receipt
 func receiptTotalPoints(stringTotal string) int {
+	var zero = decimal.NewFromFloat(0)
 	total, err := decimal.NewFromString(stringTotal)
 	if err != nil {
 		// This should be covered by validation?
@@ -43,10 +42,10 @@ func receiptTotalPoints(stringTotal string) int {
 	var points = 0
 	// decimal.NewFromFloat(0) should be a constant but can't be.
 
-	if total.Mod(decimal.NewFromFloat(pointConfig.TotalRoundMod)).Equal(decimal.NewFromFloat(0)) {
+	if total.Mod(decimal.NewFromFloat(pointConfig.TotalRoundMod)).Equal(zero) {
 		points += pointConfig.TotalRoundedPoints
 	}
-	if total.Mod(decimal.NewFromFloat(pointConfig.TotalMutiple)).Equal(decimal.NewFromFloat(0)) {
+	if total.Mod(decimal.NewFromFloat(pointConfig.TotalMutiple)).Equal(zero) {
 		points += pointConfig.TotalMutiplePoints
 	}
 
@@ -62,13 +61,10 @@ func receiptTotalPoints(stringTotal string) int {
 func retailerPoints(retailer string) int {
 	// Cleaned retailer name of spaces and non alpha numeric characters,
 	// This should probably include accented latin characters, I don't want want to mess around with regex more.
-	// Does not support localization outside of EU/US
+	// Does not support localization outside of EU/US. Probably to break on Cyrillic, kanji, hanja, ect.
 	retailRegex := regexp.MustCompile(`[^a-zA-Z0-9\s\:]*`)
 	// Regex isn't capturing spaces correctly, do it the old fashioned way.
 	var cleanedRetailer = retailRegex.ReplaceAllString(strings.ReplaceAll(retailer, " ", ""), "")
-	log.Print(len(cleanedRetailer))
-	log.Print(len(cleanedRetailer) * pointConfig.RetailerNamePointMutiplier)
-	log.Print(pointConfig.RetailerNamePointMutiplier)
 	return len(cleanedRetailer) * pointConfig.RetailerNamePointMutiplier
 }
 
