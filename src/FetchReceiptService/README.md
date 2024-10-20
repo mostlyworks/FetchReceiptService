@@ -13,7 +13,7 @@ Should get everything running.
 
 Assuming the Go sdk isn't installed:
 
-Go [here](https://go.dev/doc/install) installer it and go back to the other method.
+Go [here](https://go.dev/doc/install) install it and go back to the other method.
 
 ## Configuration
 Contained in the /config directory are configuration json. The databaseConfig is currently ignored as no database is setup to run with this service (in Memory Mode!).
