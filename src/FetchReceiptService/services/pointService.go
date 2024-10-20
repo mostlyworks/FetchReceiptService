@@ -1,4 +1,4 @@
-package points
+package services
 
 import (
 	"log"
@@ -6,21 +6,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mostlyworks/FetchReceiptService/models"
 	"github.com/shopspring/decimal"
 )
-
-type Item struct {
-	ShortDescription string
-	Price            string // Try this as decimal later
-}
-
-type Receipt struct {
-	Retailer     string
-	PurchaseDate string // try this as Time?
-	PurchaseTime string // try this as Time?
-	Items        []Item
-	Total        string // Try this as decimal later
-}
 
 const totalRoundPoints = 50
 const totalMutiplePoints = 25
@@ -67,7 +55,7 @@ const defaultPointReturn = 0
 // 	"total": "35.35"
 //   }
 
-func GetPoints(receipt Receipt) int {
+func GetPoints(receipt models.Receipt) int {
 	var pointHold = 0
 
 	log.Print(receipt.Retailer)
@@ -136,7 +124,7 @@ func retailerPoints(retailer string) int {
 // 5 points for every two items on the receipt.
 // If the trimmed length of the item description is a multiple of 3, multiply the price by 0.2 and round up to the nearest integer. The result is the number of points earned.
 // Calculate points for items from supplied array.
-func itemPoints(stringItems []Item) int {
+func itemPoints(stringItems []models.Item) int {
 	var points = 0
 
 	points += (len(stringItems) / itemCountDivsor * itemCountPoints)

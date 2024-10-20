@@ -1,7 +1,9 @@
-package main
+package services
 
 import (
 	"testing"
+
+	"github.com/mostlyworks/FetchReceiptService/models"
 )
 
 func TestReceiptTotalPoints(t *testing.T) {
@@ -50,12 +52,23 @@ func TestRetailerPoints(t *testing.T) {
 func TestItemPoints(t *testing.T) {
 	tests := []struct {
 		name   string
-		input  []Item
+		input  []models.Item
 		output int
 	}{
-		{"Mutiple of 3", []Item{{"   Klarbrunn 12-PK 12 FL OZ  ", "12.00"}}, 3},
-		{"4 Items", []Item{{"Gatorade", "2.00"}, {"Gatorade", "2.00"}, {"Gatorade", "2.00"}, {"Gatorade", "2.00"}}, itemCountPoints * 2},
-		{"5 Items", []Item{{"Gatorade", "2.00"}, {"Gatorade", "2.00"}, {"Gatorade", "2.00"}, {"Gatorade", "2.00"}, {"Gatorade", "2.00"}}, itemCountPoints * 2},
+		{"Mutiple of 3", []models.Item{{ShortDescription: "   Klarbrunn 12-PK 12 FL OZ  ", Price: "12.00"}}, 3},
+		{"4 Items",
+			[]models.Item{{ShortDescription: "Gatorade", Price: "2.00"},
+				{ShortDescription: "Gatorade", Price: "2.00"},
+				{ShortDescription: "Gatorade", Price: "2.00"},
+				{ShortDescription: "Gatorade", Price: "2.00"}},
+			itemCountPoints * 2},
+		{"5 Items",
+			[]models.Item{{ShortDescription: "Gatorade", Price: "2.00"},
+				{ShortDescription: "Gatorade", Price: "2.00"},
+				{ShortDescription: "Gatorade", Price: "2.00"},
+				{ShortDescription: "Gatorade", Price: "2.00"},
+				{ShortDescription: "Gatorade", Price: "2.00"}},
+			itemCountPoints * 2},
 	}
 
 	for _, test := range tests {
@@ -113,53 +126,53 @@ func TestTimePoints(t *testing.T) {
 func TestGetPoints(t *testing.T) {
 	tests := []struct {
 		name   string
-		input  Receipt
+		input  models.Receipt
 		output int
 	}{
-		{"Ex 1", Receipt{
-			"Target",
-			"2022-01-01",
-			"13:01",
-			[]Item{
+		{"Ex 1", models.Receipt{
+			Retailer:     "Target",
+			PurchaseDate: "2022-01-01",
+			PurchaseTime: "13:01",
+			Items: []models.Item{
 				{
-					"Mountain Dew 12PK",
-					"6.49",
+					ShortDescription: "Mountain Dew 12PK",
+					Price:            "6.49",
 				}, {
-					"Emils Cheese Pizza",
-					"12.25",
+					ShortDescription: "Emils Cheese Pizza",
+					Price:            "12.25",
 				}, {
-					"Knorr Creamy Chicken",
-					"1.26",
+					ShortDescription: "Knorr Creamy Chicken",
+					Price:            "1.26",
 				}, {
-					"Doritos Nacho Cheese",
-					"3.35",
+					ShortDescription: "Doritos Nacho Cheese",
+					Price:            "3.35",
 				}, {
-					"   Klarbrunn 12-PK 12 FL OZ  ",
-					"12.00",
+					ShortDescription: "   Klarbrunn 12-PK 12 FL OZ  ",
+					Price:            "12.00",
 				},
 			},
-			"35.35",
+			Total: "35.35",
 		}, 28},
-		{"Ex 2", Receipt{
-			"M&M Corner Market",
-			"2022-03-20",
-			"14:33",
-			[]Item{
+		{"Ex 2", models.Receipt{
+			Retailer:     "M&M Corner Market",
+			PurchaseDate: "2022-03-20",
+			PurchaseTime: "14:33",
+			Items: []models.Item{
 				{
-					"Gatorade",
-					"2.25",
+					ShortDescription: "Gatorade",
+					Price:            "2.25",
 				}, {
-					"Gatorade",
-					"2.25",
+					ShortDescription: "Gatorade",
+					Price:            "2.25",
 				}, {
-					"Gatorade",
-					"2.25",
+					ShortDescription: "Gatorade",
+					Price:            "2.25",
 				}, {
-					"Gatorade",
-					"2.25",
+					ShortDescription: "Gatorade",
+					Price:            "2.25",
 				},
 			},
-			"9.00",
+			Total: "9.00",
 		}, 109},
 	}
 
