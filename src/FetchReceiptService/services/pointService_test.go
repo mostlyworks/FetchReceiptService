@@ -180,7 +180,7 @@ func TestGetPoints(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			result := GetPoints(test.input)
 			if result != test.output {
-				t.Errorf("For input %s, expected %d, but got %d", test.input, test.output, result)
+				t.Errorf("For input %s, expected %d, but got %d", test.name, test.output, result)
 			}
 		})
 	}

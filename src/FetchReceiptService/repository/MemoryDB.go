@@ -9,7 +9,7 @@ import (
 
 type Database struct {
 	Receipts   map[uuid.UUID]models.Receipt
-	receiptsMu *sync.Mutex
+	ReceiptsMu *sync.Mutex
 }
 
 func Init() Database {

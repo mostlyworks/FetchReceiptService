@@ -11,4 +11,5 @@ type Receipt struct {
 	PurchaseTime string `json:"purchaseTime"` // try this as Time?
 	Items        []Item `json:"items"`
 	Total        string `json:"total"` // Try this as decimal later
+	Points       int
 }

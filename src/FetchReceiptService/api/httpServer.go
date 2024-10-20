@@ -20,7 +20,7 @@ func CreateServer() App {
 		httpServer: http.NewServeMux(),
 	}
 
-	ReceiptRouter(app.httpServer)
+	ReceiptRouter(app)
 
 	return app
 }
