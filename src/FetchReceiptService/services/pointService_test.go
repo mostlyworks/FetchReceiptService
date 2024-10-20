@@ -1,20 +1,68 @@
 package services
 
 import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"os"
 	"testing"
 
 	"github.com/mostlyworks/FetchReceiptService/models"
 )
 
+func setup() {
+	var loadedPointConfig models.PointConfig
+	pointConfigFile, err := os.Open("./config/pointConfig.json")
+	defer pointConfigFile.Close()
+	if err != nil {
+		fmt.Println(err.Error())
+		log.Print("Loading with Points Default config")
+		// Load defaults instead
+		loadedPointConfig = loadDefaultPointConfig(loadedPointConfig)
+	} else {
+		jsonParser := json.NewDecoder(pointConfigFile)
+		jsonParser.Decode(&pointConfig)
+		log.Print("Loaded Points Config")
+	}
+
+	InitPointsService(loadedPointConfig)
+}
+
+// This shouldn't be duplicated, but it's for tests. I don't want to make it public either.
+
+func loadDefaultPointConfig(pointConfig models.PointConfig) models.PointConfig {
+	pointConfig.TotalRoundedPoints = 50
+	pointConfig.TotalMutiplePoints = 25
+	pointConfig.TotalMutiple = 0.25
+	pointConfig.TotalRoundMod = 1.00
+	pointConfig.ItemCountPoints = 5
+	pointConfig.ItemCountDivsor = 2
+	pointConfig.ItemDescriptionMutiple = 3
+	pointConfig.ItemDescriptionPriceMutiplier = 0.2
+	pointConfig.PriceMutiplierRoundingPoints = 0
+	pointConfig.PurchaseDatePoints = 6
+	pointConfig.PurchaseDateCheckMod = 2
+	pointConfig.PurchaseTimeLowerBound = 14
+	pointConfig.PurchaseTimeUpperBound = 16
+	pointConfig.PurchaseTimePoints = 10
+	pointConfig.DateExpectedFormat = "2006-01-02"
+	pointConfig.TimeExpectedFormat = "15:04"
+	pointConfig.RetailerNamePointMutiplier = 1
+	pointConfig.DefaultPointReturn = 0
+
+	return pointConfig
+}
+
 func TestReceiptTotalPoints(t *testing.T) {
+	setup()
 	tests := []struct {
 		name   string
 		input  string
 		output int
 	}{
-		{"Round dollar & .25", "5.00", totalRoundPoints + totalMutiplePoints},
+		{"Round dollar & .25", "5.00", pointConfig.TotalRoundedPoints + pointConfig.TotalMutiplePoints},
 		{"No points", "35.40", 0},
-		{".25", "1.25", totalMutiplePoints},
+		{".25", "1.25", pointConfig.TotalMutiplePoints},
 	}
 
 	for _, test := range tests {
@@ -28,6 +76,7 @@ func TestReceiptTotalPoints(t *testing.T) {
 }
 
 func TestRetailerPoints(t *testing.T) {
+	setup()
 	tests := []struct {
 		name   string
 		input  string
@@ -50,6 +99,7 @@ func TestRetailerPoints(t *testing.T) {
 }
 
 func TestItemPoints(t *testing.T) {
+	setup()
 	tests := []struct {
 		name   string
 		input  []models.Item
@@ -61,14 +111,14 @@ func TestItemPoints(t *testing.T) {
 				{ShortDescription: "Gatorade", Price: "2.00"},
 				{ShortDescription: "Gatorade", Price: "2.00"},
 				{ShortDescription: "Gatorade", Price: "2.00"}},
-			itemCountPoints * 2},
+			pointConfig.ItemCountPoints * 2},
 		{"5 Items",
 			[]models.Item{{ShortDescription: "Gatorade", Price: "2.00"},
 				{ShortDescription: "Gatorade", Price: "2.00"},
 				{ShortDescription: "Gatorade", Price: "2.00"},
 				{ShortDescription: "Gatorade", Price: "2.00"},
 				{ShortDescription: "Gatorade", Price: "2.00"}},
-			itemCountPoints * 2},
+			pointConfig.ItemCountPoints * 2},
 	}
 
 	for _, test := range tests {
@@ -82,13 +132,14 @@ func TestItemPoints(t *testing.T) {
 }
 
 func TestDatePoints(t *testing.T) {
+	setup()
 	tests := []struct {
 		name   string
 		input  string
 		output int
 	}{
 		{"Odd Date", "2024-10-30", 0},
-		{"Even Date", "2024-10-31", purchaseDatePoints},
+		{"Even Date", "2024-10-31", pointConfig.PurchaseDatePoints},
 	}
 
 	for _, test := range tests {
@@ -102,6 +153,7 @@ func TestDatePoints(t *testing.T) {
 }
 
 func TestTimePoints(t *testing.T) {
+	setup()
 	tests := []struct {
 		name   string
 		input  string
@@ -109,8 +161,8 @@ func TestTimePoints(t *testing.T) {
 	}{
 		{"Pre check range", "10:00", 0},
 		{"Post Check range", "20:00", 0},
-		{"Check Range", "14:33", purchaseTimePoints},
-		{"Check Range", "15:00", purchaseTimePoints},
+		{"Check Range", "14:33", pointConfig.PurchaseTimePoints},
+		{"Check Range", "15:00", pointConfig.PurchaseTimePoints},
 	}
 
 	for _, test := range tests {
@@ -124,6 +176,7 @@ func TestTimePoints(t *testing.T) {
 }
 
 func TestGetPoints(t *testing.T) {
+	setup()
 	tests := []struct {
 		name   string
 		input  models.Receipt

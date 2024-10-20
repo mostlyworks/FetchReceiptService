@@ -15,6 +15,7 @@ var appServer App
 
 func ReceiptRouter(app App) {
 	appServer = app
+	services.InitPointsService(app.pointsConfig)
 	app.httpServer.HandleFunc("/receipts/process", receiptHandler)
 	app.httpServer.HandleFunc("/receipts/{id}/points", receiptPointHandler)
 }

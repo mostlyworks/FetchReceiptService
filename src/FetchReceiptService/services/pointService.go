@@ -10,25 +10,13 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-const totalRoundPoints = 50
-const totalMutiplePoints = 25
-const totalMutiple = 0.25
-const totalRoundMod = 1.00
-const itemCountPoints = 5
-const itemCountDivsor = 2
-const itemDescriptionMutiple = 3
-const itemDescriptionPriceMutiplier = 0.2
-const priceMutiplierRoundingPoints = 0
-const purchaseDatePoints = 6
-const purchaseDateCheckMod = 2
-const purchaseTimeLowerBound = 14
-const purchaseTimeUpperBound = 16
-const purchaseTimePoints = 10
-const dateExpectedFormat = "2006-01-02"
-const timeExpectedFormat = "15:04"
-const defaultPointReturn = 0
+var pointConfig models.PointConfig
 
 //TODO: Make points configurable on startup via config json.
+
+func InitPointsService(appPointConfig models.PointConfig) {
+	pointConfig = appPointConfig
+}
 
 func GetPoints(receipt models.Receipt) int {
 	var pointHold = 0
@@ -55,15 +43,15 @@ func receiptTotalPoints(stringTotal string) int {
 	var points = 0
 	// decimal.NewFromFloat(0) should be a constant but can't be.
 
-	if total.Mod(decimal.NewFromFloat(totalRoundMod)).Equal(decimal.NewFromFloat(0)) {
-		points += totalRoundPoints
+	if total.Mod(decimal.NewFromFloat(pointConfig.TotalRoundMod)).Equal(decimal.NewFromFloat(0)) {
+		points += pointConfig.TotalRoundedPoints
 	}
-	if total.Mod(decimal.NewFromFloat(totalMutiple)).Equal(decimal.NewFromFloat(0)) {
-		points += totalMutiplePoints
+	if total.Mod(decimal.NewFromFloat(pointConfig.TotalMutiple)).Equal(decimal.NewFromFloat(0)) {
+		points += pointConfig.TotalMutiplePoints
 	}
 
 	if points == 0 {
-		return defaultPointReturn
+		return pointConfig.DefaultPointReturn
 	}
 
 	return points
@@ -78,7 +66,10 @@ func retailerPoints(retailer string) int {
 	retailRegex := regexp.MustCompile(`[^a-zA-Z0-9\s\:]*`)
 	// Regex isn't capturing spaces correctly, do it the old fashioned way.
 	var cleanedRetailer = retailRegex.ReplaceAllString(strings.ReplaceAll(retailer, " ", ""), "")
-	return len(cleanedRetailer)
+	log.Print(len(cleanedRetailer))
+	log.Print(len(cleanedRetailer) * pointConfig.RetailerNamePointMutiplier)
+	log.Print(pointConfig.RetailerNamePointMutiplier)
+	return len(cleanedRetailer) * pointConfig.RetailerNamePointMutiplier
 }
 
 // 5 points for every two items on the receipt.
@@ -87,25 +78,25 @@ func retailerPoints(retailer string) int {
 func itemPoints(stringItems []models.Item) int {
 	var points = 0
 
-	points += (len(stringItems) / itemCountDivsor * itemCountPoints)
+	points += (len(stringItems) / pointConfig.ItemCountDivsor * pointConfig.ItemCountPoints)
 
 	for index := range stringItems {
 		var value = stringItems[index]
 
-		if len(strings.Trim(value.ShortDescription, " "))%itemDescriptionMutiple == 0 {
+		if len(strings.Trim(value.ShortDescription, " "))%pointConfig.ItemDescriptionMutiple == 0 {
 			price, err := decimal.NewFromString(value.Price)
 			if err != nil {
 				// This should be covered by validation?
 				log.Fatal(err)
 			}
 
-			points += int(price.Mul(decimal.NewFromFloat(itemDescriptionPriceMutiplier)).RoundUp(priceMutiplierRoundingPoints).BigInt().Int64())
+			points += int(price.Mul(decimal.NewFromFloat(pointConfig.ItemDescriptionPriceMutiplier)).RoundUp(pointConfig.PriceMutiplierRoundingPoints).BigInt().Int64())
 		}
 
 	}
 
 	if points == 0 {
-		return defaultPointReturn
+		return pointConfig.DefaultPointReturn
 	}
 
 	return points
@@ -114,18 +105,18 @@ func itemPoints(stringItems []models.Item) int {
 // 6 points if the day in the purchase date is odd.
 // Calculate points for configured check of day from given date string
 func datePoints(stringDate string) int {
-	time, err := time.Parse(dateExpectedFormat, stringDate)
+	time, err := time.Parse(pointConfig.DateExpectedFormat, stringDate)
 
 	if err != nil {
 		// This should be covered by validation?
 		log.Fatal(err)
 	}
 
-	if time.Day()%purchaseDateCheckMod != 0 {
-		return purchaseDatePoints
+	if time.Day()%pointConfig.PurchaseDateCheckMod != 0 {
+		return pointConfig.PurchaseDatePoints
 	}
 
-	return defaultPointReturn
+	return pointConfig.DefaultPointReturn
 
 }
 
@@ -133,16 +124,16 @@ func datePoints(stringDate string) int {
 // Calcuate points for configured time window from given time string
 // This should probably consider Minutes as well instead of just being on the hours.
 func timePoints(stringTime string) int {
-	time, err := time.Parse(timeExpectedFormat, stringTime)
+	time, err := time.Parse(pointConfig.TimeExpectedFormat, stringTime)
 
 	if err != nil {
 		// This should be covered by validation?
 		log.Fatal(err)
 	}
 
-	if time.Hour() >= purchaseTimeLowerBound && time.Hour() <= purchaseTimeUpperBound {
-		return purchaseTimePoints
+	if time.Hour() >= pointConfig.PurchaseTimeLowerBound && time.Hour() <= pointConfig.PurchaseTimeUpperBound {
+		return pointConfig.PurchaseTimePoints
 	}
 
-	return defaultPointReturn
+	return pointConfig.DefaultPointReturn
 }

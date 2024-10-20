@@ -1,0 +1,6 @@
+{
+    "useHttps": false,
+    "port": 8080,
+    "certFile": "",
+    "keyFile": ""
+}
