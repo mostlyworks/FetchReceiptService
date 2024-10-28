@@ -14,6 +14,7 @@ func InitReceiptService(serverDB repository.Database) {
 	database = serverDB
 }
 
+// Write Receipt to "database"
 func WriteReciept(receipt models.Receipt) uuid.UUID {
 
 	// If this was a real database, CLEAN THE DATA BEFORE INSERTION.
@@ -26,6 +27,7 @@ func WriteReciept(receipt models.Receipt) uuid.UUID {
 	return id
 }
 
+// Get points for given reciept from database
 func GetReceiptPoints(id uuid.UUID) (int, bool) {
 	var receipt, ok = database.Receipts[id]
 

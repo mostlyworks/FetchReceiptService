@@ -68,8 +68,10 @@ func itemPoints(stringItems []models.Item) int {
 	var points = 0
 
 	points += (len(stringItems) / pointConfig.ItemCountDivsor * pointConfig.ItemCountPoints)
+	var items = make(map[string]bool)
 
 	for index := range stringItems {
+		items[stringItems[index].ShortDescription] = true
 		var value = stringItems[index]
 
 		if len(strings.Trim(value.ShortDescription, " "))%pointConfig.ItemDescriptionMutiple == 0 {
@@ -77,6 +79,10 @@ func itemPoints(stringItems []models.Item) int {
 			points += int(value.Price.Mul(decimal.NewFromFloat(pointConfig.ItemDescriptionPriceMutiplier)).RoundUp(pointConfig.PriceMutiplierRoundingPoints).BigInt().Int64())
 		}
 
+	}
+
+	if len(items) == len(stringItems) {
+		points += len(stringItems) * pointConfig.UniqueItemsPoints
 	}
 
 	if points == 0 {

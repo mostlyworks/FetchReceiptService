@@ -17,6 +17,7 @@ type PointConfig struct {
 	PurchaseTimePoints            int     `json:"purchaseTimePoints"`
 	RetailerNamePointMutiplier    int     `json:"retailerNamePointMutiplier"`
 	DefaultPointReturn            int     `json:"defaultPointReturn"`
+	UniqueItemsPoints             int     `json:"uniqueItemsPoints"`
 }
 
 // Probably pulled from SSM or something in the real world.

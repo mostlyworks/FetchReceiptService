@@ -67,7 +67,7 @@ func TestItemPoints(t *testing.T) {
 		input  []models.Item
 		output int
 	}{
-		{"Mutiple of 3", []models.Item{{ShortDescription: "   Klarbrunn 12-PK 12 FL OZ  ", Price: decimal.NewFromFloat32(12.00)}}, 3},
+		{"Mutiple of 3", []models.Item{{ShortDescription: "   Klarbrunn 12-PK 12 FL OZ  ", Price: decimal.NewFromFloat32(12.00)}}, 3 + pointConfig.UniqueItemsPoints},
 		{"4 Items",
 			[]models.Item{{ShortDescription: "Gatorade", Price: decimal.NewFromFloat32(2.00)},
 				{ShortDescription: "Gatorade", Price: decimal.NewFromFloat32(2.00)},
@@ -80,6 +80,20 @@ func TestItemPoints(t *testing.T) {
 				{ShortDescription: "Gatorade", Price: decimal.NewFromFloat32(2.00)},
 				{ShortDescription: "Gatorade", Price: decimal.NewFromFloat32(2.00)},
 				{ShortDescription: "Gatorade", Price: decimal.NewFromFloat32(2.00)}},
+			pointConfig.ItemCountPoints * 2},
+		{"5 Items",
+			[]models.Item{{ShortDescription: "Gatorade11", Price: decimal.NewFromFloat32(2.00)},
+				{ShortDescription: "Gatorade21", Price: decimal.NewFromFloat32(2.00)},
+				{ShortDescription: "Gatorade31", Price: decimal.NewFromFloat32(2.00)},
+				{ShortDescription: "Gatorade41", Price: decimal.NewFromFloat32(2.00)},
+				{ShortDescription: "Gatorade51", Price: decimal.NewFromFloat32(2.00)}},
+			pointConfig.ItemCountPoints*2 + pointConfig.UniqueItemsPoints*5},
+		{"5 Items",
+			[]models.Item{{ShortDescription: "Gatorade", Price: decimal.NewFromFloat32(2.00)},
+				{ShortDescription: "Gatorade21", Price: decimal.NewFromFloat32(2.00)},
+				{ShortDescription: "Gatorade", Price: decimal.NewFromFloat32(2.00)},
+				{ShortDescription: "Gatorade41", Price: decimal.NewFromFloat32(2.00)},
+				{ShortDescription: "Gatorade51", Price: decimal.NewFromFloat32(2.00)}},
 			pointConfig.ItemCountPoints * 2},
 	}
 

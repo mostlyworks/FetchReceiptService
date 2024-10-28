@@ -61,6 +61,7 @@ func loadDefaultPointConfig(pointConfig models.PointConfig) models.PointConfig {
 	pointConfig.PurchaseTimePoints = 10
 	pointConfig.RetailerNamePointMutiplier = 1
 	pointConfig.DefaultPointReturn = 0
+	pointConfig.UniqueItemsPoints = 5
 
 	return pointConfig
 }

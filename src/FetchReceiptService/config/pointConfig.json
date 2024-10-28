@@ -14,5 +14,6 @@
     "purchaseTimeUpperBound": 16,
     "purchaseTimePoints": 10,
     "retailerNamePointMutiplier": 1,
-    "defaultPointReturn": 0
+    "defaultPointReturn": 0,
+    "uniqueItemsPoints": 5
 }
